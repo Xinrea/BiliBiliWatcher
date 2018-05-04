@@ -56,9 +56,9 @@ bool Network::request(string url) {
     }
     /* Construct Request */
     string request_s = 
-    "GET /dynamic_svr/v1/dynamic_svr/space_history?host_uid=82389 HTTP/1.1\n\rHost: " + host_name + "\n\r" +
-    "Connection: keep-alive";
-    LOG(request_s);
+    "GET /dynamic_svr/v1/dynamic_svr/space_history?host_uid=82389 HTTP/1.1\r\nHost: " + host_name + "\r\n" +
+    "Connection: keep-alive\r\n\r\n";
+    LOG("Request\n"<<request_s);
     res = send(sock_to_server,request_s.c_str(),request_s.length(),0);
     LOG("Send Finish");
     if(res != request_s.length()){
@@ -66,11 +66,12 @@ bool Network::request(string url) {
         close(sock_to_server);
         return false;
     }
-    char buffer[2000];
+    char buffer[4096*10];
+    int offset = 0;
     LOG("Recv Start");
-    res = recv(sock_to_server,buffer,2000,0);
+    while((res = recv(sock_to_server,buffer+offset,4096,0))>0) {offset+=res;};
     LOG("Recv Finish");
-    LOG("\n"<<buffer);
+    LOG("Response Message\n"<<(char*)buffer);
     /* Free Memory */
     close(sock_to_server);
     return true;
