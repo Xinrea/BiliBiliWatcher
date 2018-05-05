@@ -21,9 +21,10 @@ Network::~Network() {
 bool Network::request(string url) {
     /* Get Host IP Address */
     target_url = url;
-    string host_name = get_host_name(url);
-    LOG(host_name);
-    hostent *host_info = gethostbyname(host_name.c_str());
+    vector<string> host_name = get_host_name(url);
+    LOG(host_name[0]);
+    LOG(host_name[1]);
+    hostent *host_info = gethostbyname(host_name[0].c_str());
     in_addr host_addr;
     /* DEBUG_BEGIN */
     LOG("Resolve Host Name");
@@ -56,7 +57,7 @@ bool Network::request(string url) {
     }
     /* Construct Request */
     string request_s = 
-    "GET /dynamic_svr/v1/dynamic_svr/space_history?host_uid=82389 HTTP/1.1\r\nHost: " + host_name + "\r\n" +
+    "GET "+host_name[1]+" HTTP/1.1\r\nHost: " + host_name[0] + "\r\n" +
     "Connection: keep-alive\r\n\r\n";
     LOG("Request\n"<<request_s);
     res = send(sock_to_server,request_s.c_str(),request_s.length(),0);
@@ -66,20 +67,30 @@ bool Network::request(string url) {
         close(sock_to_server);
         return false;
     }
-    char buffer[4096*10];
-    int offset = 0;
+    char buffer[4096];
+    string response;
     LOG("Recv Start");
-    while((res = recv(sock_to_server,buffer+offset,4096,0))>0) {offset+=res;};
-    LOG("Recv Finish");
-    LOG("Response Message\n"<<(char*)buffer);
-    /* Free Memory */
+    while((res = recv(sock_to_server,buffer,4096,0))>0) {
+        /* Close String */
+        buffer[res] = '\0';
+        response.append(buffer);
+    }
+    LOG("Recv Finish: "<<response.length());
+    /* Remove Header and Store */
+    int marker_begin, marker_end;
+    marker_begin = response.find("Content-Length:");
+    marker_end = response.find("Connection:");
+    json_length =  atoi(response.substr(marker_begin+16,marker_end-marker_begin-16).c_str());
+    LOG("Content-length: "<<json_length);
+    json_data = response.substr(response.length()-json_length,-1);
+    /* Close Socket */
     close(sock_to_server);
     return true;
 }
 
 // To find the domain in url (http://xxx.xxx.com/xxx => xxx.xxx.com)
-string Network::get_host_name(const string& url) {
-    string host_name;
+vector<string> Network::get_host_name(const string& url) {
+    vector<string> host_name;
     int begin = 0, end = 0, count = 0;
     bool search_begin = true;
     for(int i = 0; i < url.length(); ++i) {
@@ -93,6 +104,7 @@ string Network::get_host_name(const string& url) {
             break;
         }
     }
-    host_name = url.substr(begin+1,end-begin-1);
+    host_name.push_back(url.substr(begin+1,end-begin-1));
+    host_name.push_back(url.substr(end,-1));
     return host_name;
 }

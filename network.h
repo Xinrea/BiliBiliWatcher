@@ -2,6 +2,7 @@
 #define BILIBILIWATCHER_NETWORK_H_
 
 #include <string>
+#include <vector>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -9,20 +10,22 @@
 #include <unistd.h>
 
 using std::string;
+using std::vector;
+
 class Network {
 	private:
 		string target_url;
 		int json_length;
-		char* json_data;
+		string json_data;
 	public:
 		explicit Network();
 		Network(string url);
 		~Network();
 		bool request(string url);
 		int length() {return json_length;}
-		char* data() {return json_data;}
+		string data() {return json_data;}
 	private:
-		string get_host_name(const string& url);
+		vector<string> get_host_name(const string& url);
 };
 
 #endif
