@@ -1,5 +1,11 @@
 #include "up.h"
 
-UP::UP(unsigned int init_uid): uid(init_uid) {
+UP::UP() {
 
+}
+
+void UP::set_from_json(Document& owner) {
+    mid = owner["mid"].GetInt();
+    name = string(owner["name"].GetString());
+    face = string(owner["face"].GetString());
 }
