@@ -1,11 +1,11 @@
 #include "cVideo.h"
 
-void cVideo::set_data(Document& content, Document& own) {
+void cVideo::set_data(Document& content) {
     title = string(content["title"].GetString());
     pic = string(content["pic"].GetString());
     desc = string(content["desc"].GetString());
     time = content["pubdate"].GetInt();
-    owner.set_from_json(own);
+    owner.set_from_json(content);
 }
 
 string cVideo::get(const string& tag) {

@@ -1,9 +1,9 @@
 #include "cDynam.h"
 
-void cDynam::set_data(Document& content, Document& own) {
+void cDynam::set_data(Document& content) {
     desc = string(content["description"].GetString());
     time = content["upload_time"].GetInt();
-    owner.set_from_json(own);
+    owner.set_from_json(content);
 }
 
 string cDynam::get(const string& tag) {

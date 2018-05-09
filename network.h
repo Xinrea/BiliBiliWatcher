@@ -1,5 +1,4 @@
-#ifndef BILIBILIWATCHER_NETWORK_H_
-#define BILIBILIWATCHER_NETWORK_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -27,5 +26,3 @@ class Network {
 	private:
 		vector<string> get_host_name(const string& url);
 };
-
-#endif

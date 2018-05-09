@@ -1,3 +1,4 @@
+#pragma once
 #include "card.h"
 
 class cVideo : public card {
@@ -7,6 +8,6 @@ class cVideo : public card {
         string pic;
         string desc;
         unsigned int time;
-        void set_data(Document& content, Document& own);
+        void set_data(Document& content);
         string get(const string& tag);
 };
