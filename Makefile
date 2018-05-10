@@ -1,3 +1,4 @@
+all: bilibiliWatcher network_test parse_test
 bilibiliWatcher : bilibiliWatcher.cpp network.cpp
 	g++ -o $(@) bilibiliWatcher.cpp network.cpp -std=c++11 -Wall
 network_test : network.cpp network_test.cpp
