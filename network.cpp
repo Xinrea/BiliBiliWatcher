@@ -27,7 +27,6 @@ bool Network::request(string url) {
     hostent *host_info = gethostbyname(host_name[0].c_str());
     in_addr host_addr;
     /* DEBUG_BEGIN */
-    LOG("Resolve Host Name");
     for(auto i = host_info->h_addr_list; *i != nullptr; ++i) {
         host_addr.s_addr = *((unsigned int *)i);
         LOG(inet_ntoa(host_addr));
@@ -59,9 +58,7 @@ bool Network::request(string url) {
     string request_s = 
     "GET "+host_name[1]+" HTTP/1.1\r\nHost: " + host_name[0] + "\r\n" +
     "Connection: keep-alive\r\n\r\n";
-    LOG("Request\n"<<request_s);
     res = send(sock_to_server,request_s.c_str(),request_s.length(),0);
-    LOG("Send Finish");
     if(res != request_s.length()){
         LOG(res<<"/"<<request_s.length()<<" | Send Miss");
         close(sock_to_server);
@@ -69,19 +66,16 @@ bool Network::request(string url) {
     }
     char buffer[4096];
     string response;
-    LOG("Recv Start");
     while((res = recv(sock_to_server,buffer,4096,0))>0) {
         /* Close String */
         buffer[res] = '\0';
         response.append(buffer);
     }
-    LOG("Recv Finish: "<<response.length());
     /* Remove Header and Store */
     int marker_begin, marker_end;
     marker_begin = response.find("Content-Length:");
     marker_end = response.find("Connection:");
     json_length =  atoi(response.substr(marker_begin+16,marker_end-marker_begin-16).c_str());
-    LOG("Content-length: "<<json_length);
     json_data = response.substr(response.length()-json_length,-1);
     /* Close Socket */
     close(sock_to_server);

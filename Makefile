@@ -4,7 +4,7 @@ bilibiliWatcher : bilibiliWatcher.cpp network.cpp
 network_test : network.cpp network_test.cpp
 	g++ -o $(@) network_test.cpp network.cpp -std=c++11 -Wall
 parse_test : parse_test.cpp network.cpp up.cpp cVideo.cpp cDynam.cpp card.cpp
-	g++ -o $(@) parse_test.cpp network.cpp up.cpp cVideo.cpp cDynam.cpp card.cpp -std=c++11 -Wall
+	g++ -o $(@) -framework Foundation parse_test.cpp network.cpp up.cpp cVideo.cpp cDynam.cpp card.cpp notifier.cpp -std=c++11 -Wall
 clean:
 	rm network_test
 	rm bilibiliWatcher
