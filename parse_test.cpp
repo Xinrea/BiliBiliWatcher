@@ -5,6 +5,7 @@ Description: input: uid num output: n'th newest dynamic info
 #include "card.h"
 #include "cVideo.h"
 #include "cDynam.h"
+#include "cForward.h"
 #include "network.h"
 #include "up.h"
 
@@ -18,17 +19,31 @@ int main(int argc, char const *argv[])
     Document d,p;
     std::cout << "Request complete" << std::endl;
     d.Parse(net.data().c_str());
-    if(argc<3)p.Parse(d["data"]["cards"][0]["card"].GetString());
-    else p.Parse(d["data"]["cards"][strtol(argv[2],NULL,10)]["card"].GetString());
-    card* c0;
-    std::cout << "Card Part Get" << std::endl;
-    if(p.HasMember("aid")){
-        c0 = new cVideo;
-        std::cout << "视频\n";
+    int type;
+    if(argc<3){
+        p.Parse(d["data"]["cards"][0]["card"].GetString());
+        type = d["data"]["cards"][0]["desc"]["type"].GetInt();
     }
     else {
-        c0 = new cDynam;
-        std::cout << "动态\n";
+        p.Parse(d["data"]["cards"][strtol(argv[2],NULL,10)]["card"].GetString());
+        type = d["data"]["cards"][strtol(argv[2],NULL,10)]["desc"]["type"].GetInt();
+    }
+    card* c0;
+    std::cout << "Card Part Get, Type: " << type << std::endl;
+    //type[1,转发][2,动态][8,投稿]
+    switch(type){
+        case 1:{
+            c0 = new cForward;
+            break;
+        }
+        case 2:{
+            c0 = new cDynam;
+            break;
+        }
+        case 8:{
+            c0 = new cVideo;
+            break;
+        }
     }
     c0->set_data(p);
     // string content = "osascript -e 'display notification \"";
