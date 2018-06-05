@@ -1,1 +1,2 @@
-*.json
+.vscode/*.json
+config/bwSettings.json

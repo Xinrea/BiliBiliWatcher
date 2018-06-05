@@ -1,0 +1,13 @@
+{
+    "basic":{
+        "database":{
+            "server":"tcp://xxx.xx:3306",
+            "username":"your username",
+            "password":"your password",
+            "reconnect":5
+        },
+        "timegap":10
+    }
+}
+
+/* please rename this file to "bwSettings.json" */
