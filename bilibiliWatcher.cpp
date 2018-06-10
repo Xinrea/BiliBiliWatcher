@@ -94,18 +94,21 @@ int main(int argc, char** argv) {
     string request_prefix="https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?host_uid=";
     while(true){
         for(auto i : uplist){
+            LOG(string("begin get card: ")+to_string(i));
             net.request(request_prefix+to_string(i));
             Document d,p;
             d.Parse(net.data().c_str());
             /* analyze json data */
             int type;
+            uint64_t dynamic_id;
             p.Parse(d["data"]["cards"][0]["card"].GetString());
             type = d["data"]["cards"][0]["desc"]["type"].GetInt();
+            dynamic_id = d["data"]["cards"][0]["desc"]["dynamic_id"].GetUint64();
             card* c0;
             //type[1,转发][2,动态][8,投稿]
             switch(type){
                 case 1:{
-                    c0 = new cForward;
+                    c0 = new cForward();
                     c0->set_data(p);
                     /* check connection */
                     while(!con->isValid()&&reconnection_times--)con->reconnect();
@@ -113,13 +116,18 @@ int main(int argc, char** argv) {
                         std::cerr << "connection failed" << std::endl;
                         return 0;
                     }
+                    res = stat->executeQuery(string("SELECT * FROM cards where cardid='")+to_string(dynamic_id)+"'");
+                    if(res->rowsCount())break;// already exist in table
                     int timestamp = stoi(c0->get("time"));
-                    int error = stat->executeUpdate(string("INSERT INTO cards VALUES(")+c0->get("mid")+","+"'forward',"+c0->get("desc")+","+datatime(timestamp)+")");
-                    
+                    LOG(string("get Forward_card: ")+datatime(timestamp));
+                    // else insert new data into table
+                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+","+"'forward','"+c0->get("desc")+"','"+datatime(timestamp)+"')";
+                    LOG(sqlstat);
+                    int num = stat->executeUpdate(sqlstat);
                     break;
                 }
                 case 2:{
-                    c0 = new cDynam;
+                    c0 = new cDynam();
                     c0->set_data(p);
                     /* check connection */
                     while(!con->isValid()&&reconnection_times--)con->reconnect();
@@ -127,10 +135,18 @@ int main(int argc, char** argv) {
                         std::cerr << "connection failed" << std::endl;
                         return 0;
                     }
+                    res = stat->executeQuery(string("SELECT * FROM cards where cardid='")+to_string(dynamic_id)+"'");
+                    if(res->rowsCount())break;// already exist in table
+                    int timestamp = stoi(c0->get("time"));
+                    LOG(string("get Dynam_card: ")+datatime(timestamp));
+                    // else insert new data into table
+                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+","+"'dynam','"+c0->get("desc")+"','"+datatime(timestamp)+"')";
+                    LOG(sqlstat);
+                    int num = stat->executeUpdate(sqlstat);
                     break;
                 }
                 case 8:{
-                    c0 = new cVideo;
+                    c0 = new cVideo();
                     c0->set_data(p);
                     /* check connection */
                     while(!con->isValid()&&reconnection_times--)con->reconnect();
@@ -138,11 +154,19 @@ int main(int argc, char** argv) {
                         std::cerr << "connection failed" << std::endl;
                         return 0;
                     }
+                    res = stat->executeQuery(string("SELECT * FROM cards where cardid='")+to_string(dynamic_id)+"'");
+                    if(res->rowsCount())break;// already exist in table
+                    int timestamp = stoi(c0->get("time"));
+                    LOG(string("get Video_card: ")+datatime(timestamp));
+                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+",'"+c0->get("title")+"','"+c0->get("desc")+"','"+datatime(timestamp)+"')";
+                    LOG(sqlstat);
+                    // else insert new data into table
+                    int num = stat->executeUpdate(sqlstat);
                     break;
                 }
             }
         }
-        
+        sleep(timegap);
     }
     log.close();
     delete res;

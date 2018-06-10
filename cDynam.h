@@ -1,6 +1,7 @@
 #pragma once
 #include "card.h"
-
+#include <string>
+using namespace std;
 class cDynam : public card {
     public:
         string desc;

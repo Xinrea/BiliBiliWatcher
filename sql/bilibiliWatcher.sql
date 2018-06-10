@@ -36,7 +36,8 @@ CREATE TABLE watch(
 
 DROP TABLE IF EXISTS cards;
 CREATE TABLE cards(
-    upid int(11) primary key,
+    cardid varchar(128) primary key,
+    upid int(11) NOT NULL,
     title varchar(255) NOT NULL,
     content varchar(512) NOT NULL,
     ptime datetime NOT NULL,

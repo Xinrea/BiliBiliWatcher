@@ -22,14 +22,14 @@ bool Network::request(string url) {
     /* Get Host IP Address */
     target_url = url;
     vector<string> host_name = get_host_name(url);
-    LOG(host_name[0]);
-    LOG(host_name[1]);
+    //LOG(host_name[0]);
+    //LOG(host_name[1]);
     hostent *host_info = gethostbyname(host_name[0].c_str());
     in_addr host_addr;
     /* DEBUG_BEGIN */
     for(auto i = host_info->h_addr_list; *i != nullptr; ++i) {
         host_addr.s_addr = *((unsigned int *)i);
-        LOG(inet_ntoa(host_addr));
+        //LOG(inet_ntoa(host_addr));
     }
     /* DEBGU_END */
     host_addr.s_addr = *((unsigned int *)host_info->h_addr_list[0]);
