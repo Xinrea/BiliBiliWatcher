@@ -96,14 +96,17 @@ int main(int argc, char** argv) {
         for(auto i : uplist){
             LOG(string("begin get card: ")+to_string(i));
             net.request(request_prefix+to_string(i));
+            LOG("Aquire Json");
             Document d,p;
             d.Parse(net.data().c_str());
+            LOG("Parse Json");
             /* analyze json data */
             int type;
             uint64_t dynamic_id;
             p.Parse(d["data"]["cards"][0]["card"].GetString());
             type = d["data"]["cards"][0]["desc"]["type"].GetInt();
             dynamic_id = d["data"]["cards"][0]["desc"]["dynamic_id"].GetUint64();
+            LOG("Get Basic Info");
             card* c0;
             //type[1,转发][2,动态][8,投稿]
             switch(type){
@@ -165,6 +168,7 @@ int main(int argc, char** argv) {
                     break;
                 }
             }
+            LOG("Finish");
         }
         sleep(timegap);
     }
