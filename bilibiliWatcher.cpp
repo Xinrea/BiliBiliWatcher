@@ -84,15 +84,15 @@ int main(int argc, char** argv) {
         return 0;
     }
     /* acquire upid list */
-    res = stat->executeQuery("SELECT upid FROM upinfo");
-    vector<int> uplist;
-    while(res->next()){
-        std::cout << res->getInt(1) << std::endl;
-        uplist.push_back(res->getInt(1));
-    }
     Network net;
     string request_prefix="https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?host_uid=";
     while(true){
+        res = stat->executeQuery("SELECT upid FROM upinfo");
+        vector<int> uplist;
+        while(res->next()){
+            std::cout << res->getInt(1) << std::endl;
+            uplist.push_back(res->getInt(1));
+        }
         for(auto i : uplist){
             LOG(string("begin get card: ")+to_string(i));
             net.request(request_prefix+to_string(i));
@@ -124,9 +124,16 @@ int main(int argc, char** argv) {
                     int timestamp = stoi(c0->get("time"));
                     LOG(string("get Forward_card: ")+datatime(timestamp));
                     // else insert new data into table
-                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+","+"'forward','"+c0->get("desc")+"','"+datatime(timestamp)+"')";
+                    int pos;
+                    string desc = c0->get("desc");
+                    pos = desc.find("'");
+                    if(pos != -1)desc = desc.replace(pos,1,"");
+                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+","+"'forward','"+desc+"','"+datatime(timestamp)+"')";
                     LOG(sqlstat);
-                    int num = stat->executeUpdate(sqlstat);
+                    string upname = c0->get("name");
+                    string sql_upinfo = string("UPDATE upinfo SET upname='"+upname+"' WHERE upid="+to_string(i));
+                    stat->executeUpdate(sql_upinfo);
+                    stat->executeUpdate(sqlstat);
                     break;
                 }
                 case 2:{
@@ -143,9 +150,16 @@ int main(int argc, char** argv) {
                     int timestamp = stoi(c0->get("time"));
                     LOG(string("get Dynam_card: ")+datatime(timestamp));
                     // else insert new data into table
-                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+","+"'dynam','"+c0->get("desc")+"','"+datatime(timestamp)+"')";
+                    int pos;
+                    string desc = c0->get("desc");
+                    pos = desc.find("'");
+                    if(pos != -1)desc = desc.replace(pos,1,"");
+                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+","+"'dynam','"+desc+"','"+datatime(timestamp)+"')";
                     LOG(sqlstat);
-                    int num = stat->executeUpdate(sqlstat);
+                    string upname = c0->get("name");
+                    string sql_upinfo = string("UPDATE upinfo SET upname='"+upname+"' WHERE upid="+to_string(i));
+                    stat->executeUpdate(sql_upinfo);
+                    stat->executeUpdate(sqlstat);
                     break;
                 }
                 case 8:{
@@ -161,10 +175,20 @@ int main(int argc, char** argv) {
                     if(res->rowsCount())break;// already exist in table
                     int timestamp = stoi(c0->get("time"));
                     LOG(string("get Video_card: ")+datatime(timestamp));
-                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+",'"+c0->get("title")+"','"+c0->get("desc")+"','"+datatime(timestamp)+"')";
+                    int pos;
+                    string title = c0->get("title");
+                    pos = title.find("'");
+                    if(pos != -1)title = title.replace(pos,1,"");
+                    string desc = c0->get("desc");
+                    pos = desc.find("'");
+                    if(pos != -1)desc = desc.replace(pos,1,"");
+                    string sqlstat = string("INSERT INTO cards VALUES('")+to_string(dynamic_id)+"',"+c0->get("mid")+",'"+title+"','"+desc+"','"+datatime(timestamp)+"')";
                     LOG(sqlstat);
                     // else insert new data into table
-                    int num = stat->executeUpdate(sqlstat);
+                    string upname = c0->get("name");
+                    string sql_upinfo = string("UPDATE upinfo SET upname='"+upname+"' WHERE upid="+to_string(i));
+                    stat->executeUpdate(sql_upinfo);
+                    stat->executeUpdate(sqlstat);
                     break;
                 }
             }
